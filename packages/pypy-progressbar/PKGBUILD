@@ -1,0 +1,56 @@
+# Maintainer: David Runge <dvzrv@archlinux.org>
+# Contributor: Maxim Andersson <thesilentboatman@gmail.com>
+# Contributor: NicoHood <archlinux {cat} nicohood {dog} de>
+
+_name=progressbar2
+pkgname=pypy-progressbar
+pkgdesc="A progress bar for Python"
+pkgver=4.5.0
+pkgrel=2
+arch=(any)
+url="https://github.com/WoLpH/python-progressbar"
+license=(BSD-3-Clause)
+depends=(
+  pypy3
+  pypy-utils
+)
+makedepends=(
+  pypy-build
+  pypy-installer
+  pypy-setuptools
+  pypy-setuptools-scm
+  pypy-sphinx
+  pypy-wheel
+)
+checkdepends=(
+  pypy-dill
+  pypy-pytest
+  pypy-freezegun
+)
+source=($url/releases/download/v$pkgver/$_name-$pkgver.tar.gz{,.asc})
+sha512sums=('84d13cce516aebc184285479849a1f4d16d16bbd48c7eab55c28ce131f5c770d97368df1ca57499a59e4d2994bce5a0cef7cc3d7c3a358b2dd6beba785f5db33'
+            'SKIP')
+b2sums=('3c4adc503d1b6e0121dd579719aa6758a52459cf7c2d63016032edd89d9f22918b1e0b497237b1658f703d790273feb64818e420b752a5f0e04e99e75042fc1d'
+        'SKIP')
+validpgpkeys=('149325FD15904E9C4EB89E95E81444E9CE1F695D') # Rick van Hattem <wolph@wol.ph>
+
+build() {
+  cd $_name-$pkgver
+  SETUPTOOLS_SCM_PRETEND_VERSION=$pkgver pypy -m build --wheel --no-isolation
+}
+
+check() {
+  local _site_packages=$(pypy -c "import site; print(site.getsitepackages()[0])")
+
+  cd $_name-$pkgver
+  pypy -m installer --destdir=test_dir dist/*.whl
+  export PYTHONPATH="test_dir/$_site_packages:$PYTHONPATH"
+  pypy -m pytest -vv -c /dev/null
+}
+
+package() {
+  cd $_name-$pkgver
+  pypy -m installer --destdir="$pkgdir" dist/*.whl
+  install -vDm 644 {CHANGES,CONTRIBUTING,README}.rst -t "$pkgdir/usr/share/doc/$pkgname/"
+  install -vDm 644 LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
+}
