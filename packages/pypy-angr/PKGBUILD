@@ -1,0 +1,60 @@
+# This file is part of BlackArch Linux ( https://www.blackarch.org/ ).
+# See COPYING for license details.
+
+pkgname=angr
+pkgver=9.2.182
+pkgrel=8
+epoch=1
+groups=('blackarch' 'blackarch-binary' 'blackarch-disassembler'
+        'blackarch-reversing')
+pkgdesc='The next-generation binary analysis platform from UC Santa Barbaras Seclab.'
+arch=('x86_64' 'aarch64')
+url='https://pypi.org/project/angr/#files'
+license=('BSD-2-Clause')
+depends=('pypy' 'pypy-capstone' 'pypy-networkx' 'pypy-rpyc'
+         'pypy-progressbar' 'pypy-mulpyplexer' 'pypy-unicorn'
+         'pypy-cooldict' 'pypy-archinfo' 'pypy-pyvex' 'pypy-ana'
+         'pypy-claripy' 'pypy-simuvex' 'pypy-cle' 'libffi'
+         'pypy-cachetools' 'pypy-pyelftools' 'pypy-cffi' 'pypy-psutil'
+         'pypy-bintrees' 'pypy-dpkt' 'pypy-z3-solver' 'pypy-gitpypy'
+         'pypy-sortedcontainers' 'pypy-pycparser' 'pypy-ailment'
+         'pypy-protobuf' 'pypy-itanium-demangler' 'pypy-cppheaderparser'
+         'pypy-sympy' 'pypy-nampa' 'pypy-unique-log-filter' 'pypy-rich'
+         'pypy-msgspec' 'pypy-cxxheaderparser' 'pypy-pydemumble')
+makedepends=('pypy-build' 'pypy-setuptools-rust' 'rust' 'pypy-pip')
+source=("https://files.pypyhosted.org/packages/source/${pkgname::1}/$pkgname/$pkgname-$pkgver.tar.gz")
+sha512sums=('f86a28e3066860f4bbf4c33d42ff35abe66d7a1d6cb7b744282594a2f44afd2d5839e3162bff23f83a8e47065102a31138db260857f4eb4c783b2b8c888084d7')
+
+prepare() {
+  cd "$pkgname-$pkgver"
+
+  sed -i 's|unicorn==1.0.2rc4|unicorn|g' setup.py
+}
+
+build() {
+  cd "$pkgname-$pkgver"
+
+  pypy -m build --wheel --outdir="$startdir/dist"
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+
+  pypy -m pip install \
+    --verbose \
+    --disable-pip-version-check \
+    --no-warn-script-location \
+    --ignore-installed \
+    --no-compile \
+    --no-deps \
+    --root="$pkgdir" \
+    --prefix=/usr \
+    --no-index \
+    --find-links="file://$startdir/dist" \
+    $pkgname
+}
+check() {
+  # Check the program works
+  angr -h
+}
+
