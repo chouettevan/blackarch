@@ -36,6 +36,10 @@ build() {
 
   python -m build --wheel --outdir="$startdir/dist"
 }
+check() {
+  # Basic functionality test
+  angr -h
+}
 
 package() {
   cd "$pkgname-$pkgver"
