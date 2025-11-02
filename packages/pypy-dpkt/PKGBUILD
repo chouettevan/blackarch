@@ -1,0 +1,46 @@
+# This file is part of BlackArch Linux ( https://www.blackarch.org/ ).
+# See COPYING for license details.
+
+pkgbase=pypy-dpkt
+pkgname=('pypy2-dpkt' 'pypy-dpkt')
+_pkgname=dpkt
+pkgver=1.9.8
+pkgrel=4
+pkgdesc='Fast, simple packet creation / parsing, with definitions for the basic TCP/IP protocols.'
+arch=('any')
+url='https://pypi.org/project/dpkt/#files'
+license=('BSD')
+makedepends=('pypy2-setuptools' 'pypy-setuptools')
+source=("https://files.pypyhosted.org/packages/source/${_pkgname::1}/$_pkgname/$_pkgname-$pkgver.tar.gz")
+sha512sums=('c72d96ab31225424f0911898cf80a48a0a4bff039761e4e89253b5f2cc89cc4ef2f7899359a0d978dd3e25ded22b35e98ccfb9b0deef0461be4e52619e091b02')
+
+prepare() {
+  cp -a "$_pkgname-$pkgver"{,-2}
+}
+
+build() {
+  cd "$_pkgname-$pkgver-2"
+
+  pypy2 setup.py build
+
+  cd "$srcdir/$_pkgname-$pkgver"
+
+  pypy setup.py build
+}
+
+package_pypy2-dpkt() {
+  depends=('pypy2')
+
+  cd "$_pkgname-$pkgver-2"
+
+  pypy2 setup.py install --root="$pkgdir" --prefix=/usr -O1 --skip-build
+}
+
+package_pypy-dpkt() {
+  depends=('pypy')
+
+  cd "$_pkgname-$pkgver"
+
+  pypy setup.py install --root="$pkgdir" --prefix=/usr -O1 --skip-build
+}
+
