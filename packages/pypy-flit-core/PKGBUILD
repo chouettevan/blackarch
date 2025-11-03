@@ -22,3 +22,4 @@ package() {
   pypy3 bootstrap_install.py --installdir "$pkgdir"/opt/pypy3/lib/pypy3.11/site-packages dist/${_base}-*.whl
   install -Dm 644 LICENSE -t "${pkgdir}/usr/share/licenses/${pkgname}"
 }
+
